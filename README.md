@@ -23,7 +23,9 @@
 ```python
 import os
 import subprocess
-from datetime import datetime
+from datetime import datetime, timedelta
+import time
+import schedule
 
 def log_login_time():
     # Change to the repository directory
@@ -42,13 +44,24 @@ def log_login_time():
     os.system(f'git commit -m "Logged login at {formatted_time}"')
     os.system('git push')
 
-if __name__ == '__main__':
+def check_and_log():
     # Check for internet connection
     response = subprocess.run(['ping', '-c', '1', 'github.com'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if response.returncode == 0:
         log_login_time()
+        schedule.clear()  # Clear the schedule after successfully logging the time
     else:
         print("No internet connection. Login time not logged.")
+
+def main():
+    schedule.every().day.at("12:00").do(check_and_log)
+    
+    while True:
+        schedule.run_pending()
+        time.sleep(300)  # Sleep for 5 minutes
+
+if __name__ == '__main__':
+    main()
 ```
 
 Replace `/path/to/reimagined-octo-waddle` with the actual path to the `reimagined-octo-waddle` directory on your machine.
